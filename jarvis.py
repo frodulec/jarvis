@@ -68,7 +68,7 @@ while True:
     new_val, skip = get_symbol_values('CD Projekt')
     if new_val/current_val > 1.01 or new_val/current_val < 0.99:
         current_val = new_val
-        engine.say('Aktualny kurs cdproject wynosi' + current_val + ' złotych')
+        engine.say('Aktualny kurs cdproject wynosi' + str(current_val) + ' złotych')
         engine.runAndWait()
         print('zmiana ', current_val)
     else:
