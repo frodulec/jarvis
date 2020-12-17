@@ -15,7 +15,7 @@ def parse_text(text, starting_txt, end_txt, return_rounded_float=False):
         return text[:end]
 
 
-def get_symbol_values(symbol):
+def get_symbol_values(symbol, say=False):
     url = 'https://www.bankier.pl/inwestowanie/profile/quote.html?symbol=' + symbol.upper().replace(' ', '')
     text = requests.get(url, timeout=10000).text
     # print(text)
@@ -26,13 +26,15 @@ def get_symbol_values(symbol):
     end = text.find(end_string)
     cut_text = text[:end]
 
-    opening_value = parse_text(cut_text, 'data-open="', '"', True)
-    current_value = parse_text(cut_text, 'data-last="', '"', True)
-    engine.say('Kurs otwarcia' + symbol + ' wyniósł' + opening_value + ' złotych')
-    engine.say('Aktualny kurs' + symbol + ' wynosi' + current_value + ' złotych')
-    print('Kurs otwarcia', symbol, opening_value)
-    print('Aktualny kurs', symbol, current_value)
-    return current_value, open
+    opening_value = float(parse_text(cut_text, 'data-open="', '"', True))
+    current_value = float(parse_text(cut_text, 'data-last="', '"', True))
+    if say:
+        engine.say('Kurs otwarcia' + symbol + ' wyniósł' + str(opening_value) + ' złotych')
+        engine.say('Aktualny kurs' + symbol + ' wynosi' + str(current_value) + ' złotych')
+        print('Kurs otwarcia', symbol, opening_value)
+        print('Aktualny kurs', symbol, current_value)
+
+    return current_value, opening_value
 
 
 def get_wather():
@@ -55,12 +57,12 @@ def get_calendar(calendar_url):
 
 get_calendar('https://docs.google.com/spreadsheets/d/1qkuZfhWN2ZLHsSX0t2_ptC5geoDVSwy4O9dRpeh89NA/edit?usp=sharing')
 engine = pyttsx3.init()
-get_symbol_values('Allegro')
+get_symbol_values('Allegro', True)
 
-current_val = float(get_symbol_values('CD Projekt'))
+current_val, opening_val = get_symbol_values('CD Projekt', True)
 engine.runAndWait()
 while True:
-    new_val = float(get_symbol_values('CD Projekt'))
+    new_val, skip = get_symbol_values('CD Projekt')
     if new_val/current_val > 1.01 or new_val/current_val < 0.99:
         current_val = new_val
         engine.say('Aktualny kurs cdproject wynosi' + current_value + ' złotych')
@@ -69,7 +71,7 @@ while True:
     else:
         print(new_val/current_val)
 
-    time.sleep(30)
+    time.sleep(10)
 
 # get_wather()
 
