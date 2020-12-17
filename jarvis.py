@@ -1,5 +1,8 @@
 import requests
 import pyttsx3
+import pandas as pd
+from io import StringIO
+import time
 
 
 def parse_text(text, starting_txt, end_txt, return_rounded_float=False):
@@ -13,10 +16,10 @@ def parse_text(text, starting_txt, end_txt, return_rounded_float=False):
 
 
 def get_symbol_values(symbol):
-    url = 'https://www.bankier.pl/inwestowanie/profile/quote.html?symbol=' + symbol
+    url = 'https://www.bankier.pl/inwestowanie/profile/quote.html?symbol=' + symbol.upper().replace(' ', '')
     text = requests.get(url, timeout=10000).text
     # print(text)
-    starting_string = 'last-trade-' + symbol
+    starting_string = 'last-trade-' + symbol.upper().replace(' ', '')
     end_string = '><'
     begin = text.find(starting_string) + len(starting_string)
     text = text[begin:]
@@ -25,10 +28,11 @@ def get_symbol_values(symbol):
 
     opening_value = parse_text(cut_text, 'data-open="', '"', True)
     current_value = parse_text(cut_text, 'data-last="', '"', True)
-    engine.say('Kurs otwarcia' + symbol + ' wyniósł' + opening_value)
-    engine.say('Aktualny kurs' + symbol + ' wynosi' + current_value)
-    print(opening_value)
-    print(current_value)
+    engine.say('Kurs otwarcia' + symbol + ' wyniósł' + opening_value + ' złotych')
+    engine.say('Aktualny kurs' + symbol + ' wynosi' + current_value + ' złotych')
+    print('Kurs otwarcia', symbol, opening_value)
+    print('Aktualny kurs', symbol, current_value)
+    return current_value, open
 
 
 def get_wather():
@@ -39,9 +43,34 @@ def get_wather():
     print(opady)
 
 
+def get_calendar(calendar_url):
+    text = requests.get(calendar_url, timeout=10000).text
+    calendar_text = parse_text(text, 'content="CalendarSheet', '"><meta name="google"')
+    print(calendar_text)
+    csv_file = StringIO(calendar_text)
+    df = pd.read_csv(csv_file, sep=',')
+    print(df)
+    return df
+
+
+get_calendar('https://docs.google.com/spreadsheets/d/1qkuZfhWN2ZLHsSX0t2_ptC5geoDVSwy4O9dRpeh89NA/edit?usp=sharing')
 engine = pyttsx3.init()
-get_symbol_values('ALLEGRO')
-get_symbol_values('CDPROJEKT')
+get_symbol_values('Allegro')
+
+current_val = float(get_symbol_values('CD Projekt'))
+engine.runAndWait()
+while True:
+    new_val = float(get_symbol_values('CD Projekt'))
+    if new_val/current_val > 1.01 or new_val/current_val < 0.99:
+        current_val = new_val
+        engine.say('Aktualny kurs cdproject wynosi' + current_value + ' złotych')
+        engine.runAndWait()
+        print('zmiana ', current_val)
+    else:
+        print(new_val/current_val)
+
+    time.sleep(30)
+
 # get_wather()
 
-engine.runAndWait()
+
