@@ -71,7 +71,7 @@ def get_wather():
 
 def get_calendar(calendar_url):
     text = requests.get(calendar_url, timeout=10000).text
-    calendar_text = parse_text(text, 'content="CalendarSheet', '"><meta name="google"')
+    calendar_text = parse_text(text, 'content="CalendarSheet', '"><meta name="google"').replace(',', ', ')
     print(calendar_text)
     engine.say(calendar_text)
     csv_file = StringIO(calendar_text)
@@ -91,7 +91,7 @@ current_val, opening_val = get_investing_values('CD Project', True)
 engine.runAndWait()
 while True:
     new_val, change_val = get_investing_values('CD Project')
-    if new_val / current_val > 1.01 or new_val / current_val < 0.99:
+    if new_val / current_val > 1.003 or new_val / current_val < 0.997:
         if new_val / current_val > 1:
             engine.say('Wielki sukces polskiej prawicy')
         else:
