@@ -5,6 +5,7 @@ from io import StringIO
 import time
 import datetime as dt
 
+
 def parse_text(text, starting_txt, end_txt, return_rounded_float=False):
     begin = text.find(starting_txt) + len(starting_txt)
     text = text[begin:]
@@ -57,8 +58,9 @@ def get_calendar(calendar_url):
 
 
 engine = pyttsx3.init()
-# engine.say(dt.datetime.now())
+engine.say('Jest ' + str(dt.datetime.now().date()))
 print(dt.datetime.now())
+engine.say('Wpisy z kalendarza')
 get_calendar('https://docs.google.com/spreadsheets/d/1qkuZfhWN2ZLHsSX0t2_ptC5geoDVSwy4O9dRpeh89NA/edit?usp=sharing')
 get_symbol_values('Allegro', True)
 
