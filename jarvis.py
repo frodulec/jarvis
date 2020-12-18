@@ -31,7 +31,7 @@ def get_investing_values(symbol, say=False):
 
     if say:
         engine.say('Aktualny kurs' + symbol + ' wynosi' + str(current_value) + ' złotych')
-        engine.say('Zmiana' + symbol + 'wyniosła ' + symbol + str(change_percentage) + ' procent')
+        engine.say('Zmiana' + symbol + 'wyniosła ' + str(change_percentage) + ' procent')
         print('Aktualny kurs', symbol, current_value)
         print('Zmiana ', symbol, change_percentage, '%')
 
@@ -98,7 +98,7 @@ while True:
             engine.say('Dramat')
 
         current_val = new_val
-        engine.say('Aktualny kurs cdproject wynosi' + str(current_val) + ' złotych. Zmiana kursi dzisiaj to: ' + str(change_val) + ' procent')
+        engine.say('Aktualny kurs cdproject wynosi' + str(current_val) + ' złotych. Zmiana kursu dzisiaj to: ' + str(change_val) + ' procent')
         engine.runAndWait()
         print('zmiana ', current_val)
     else:
