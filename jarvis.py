@@ -68,16 +68,19 @@ current_val, opening_val = get_symbol_values('CD Projekt', True)
 engine.runAndWait()
 while True:
     new_val, skip = get_symbol_values('CD Projekt')
-    if new_val/current_val > 1.01 or new_val/current_val < 0.99:
+    if new_val / current_val > 1.01 or new_val / current_val < 0.99:
+        if new_val / current_val > 1:
+            engine.say('Wielki sukces polskiej prawicy')
+        else:
+            engine.say('Dramat')
+
         current_val = new_val
-        engine.say('Aktualny kurs cdproject wynosi' + str(current_val) + ' złotych')
+        engine.say('Aktualny kurs CD Project wynosi' + str(current_val) + ' złotych')
         engine.runAndWait()
         print('zmiana ', current_val)
     else:
-        print(new_val/current_val)
+        print(new_val / current_val)
 
     time.sleep(10)
 
 # get_wather()
-
-
