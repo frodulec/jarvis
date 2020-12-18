@@ -10,10 +10,34 @@ def parse_text(text, starting_txt, end_txt, return_rounded_float=False):
     begin = text.find(starting_txt) + len(starting_txt)
     text = text[begin:]
     end = text.find(end_txt)
+    # print('___', text[:end], '___')
     if return_rounded_float:
-        return round(float(text[:end]), 2)
+        return round(float((text[:end]).replace(',', '')), 2)
     else:
         return text[:end]
+
+
+def get_btc_usd(say=False):
+    headers = {
+        'user-agent': "'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'"}
+    text = requests.get('https://www.investing.com/crypto/bitcoin/btc-usd?cid=49798', timeout=10000, headers=headers).text
+
+    starting_string = '<div class="float_lang_base_1 bold">'
+    end_string = '</div>'
+    cut_text = parse_text(text, starting_string, end_string)
+    print(cut_text)
+
+    current_value = parse_text(cut_text, '-last" dir="ltr">', '</span>', True)
+    change_percentage = parse_text(cut_text, 'redFont parentheses" dir="ltr">',
+                                   '%</span>', True)
+
+    if say:
+        engine.say('Aktualny kurs btc/usd' + ' wynosi' + str(current_value))
+        engine.say('Zmiana wyniosła ' + str(change_percentage) + ' procent')
+        print('Aktualny kurs', current_value)
+        print('Zmiana ', change_percentage, '%')
+
+    return current_value, change_percentage
 
 
 def get_investing_values(symbol, say=False):
@@ -61,7 +85,7 @@ def get_bankier_values(symbol, say=False):
     return current_value, opening_value
 
 
-def get_wather():
+def get_weather():
     url = 'https://www.google.com/search?q=pogoda%20warszawa'
     text = requests.get(url, timeout=10000).text
     print(text)
@@ -81,6 +105,7 @@ def get_calendar(calendar_url):
 
 
 engine = pyttsx3.init()
+get_btc_usd(True)
 # engine.say(dt.datetime.now())
 print(dt.datetime.now())
 engine.say('Wpisy z kalendarza')
@@ -98,14 +123,15 @@ while True:
             engine.say('Dramat')
 
         current_val = new_val
+        print(dt.datetime.now())
         engine.say('Aktualny kurs CD Project wynosi' + str(current_val) + ' złotych. Zmiana kursu dzisiaj to: ' + str(change_val) + ' procent')
         engine.runAndWait()
         print('zmiana ', current_val)
     else:
         print(new_val / current_val)
 
-    time.sleep(10)
+    time.sleep(30)
 
-# get_wather()
+# get_weather()
 
 
