@@ -31,7 +31,7 @@ def get_investing_values(symbol, say=False):
 
     if say:
         engine.say('Aktualny kurs' + symbol + ' wynosi' + str(current_value) + ' złotych')
-        engine.say('Zmiana' + symbol + 'wyniosła ' + str(change_percentage) + ' procent')
+        engine.say('Zmiana' + symbol + ' wyniosła ' + str(change_percentage) + ' procent')
         print('Aktualny kurs', symbol, current_value)
         print('Zmiana ', symbol, change_percentage, '%')
 
@@ -91,14 +91,14 @@ current_val, opening_val = get_investing_values('CD Project', True)
 engine.runAndWait()
 while True:
     new_val, change_val = get_investing_values('CD Project')
-    if new_val / current_val > 1.003 or new_val / current_val < 0.997:
+    if new_val / current_val > 1.01 or new_val / current_val < 0.99:
         if new_val / current_val > 1:
             engine.say('Wielki sukces polskiej prawicy')
         else:
             engine.say('Dramat')
 
         current_val = new_val
-        engine.say('Aktualny kurs cdproject wynosi' + str(current_val) + ' złotych. Zmiana kursu dzisiaj to: ' + str(change_val) + ' procent')
+        engine.say('Aktualny kurs CD Project wynosi' + str(current_val) + ' złotych. Zmiana kursu dzisiaj to: ' + str(change_val) + ' procent')
         engine.runAndWait()
         print('zmiana ', current_val)
     else:
