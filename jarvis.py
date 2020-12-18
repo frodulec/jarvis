@@ -83,6 +83,7 @@ def get_calendar(calendar_url):
 engine = pyttsx3.init()
 # engine.say(dt.datetime.now())
 print(dt.datetime.now())
+engine.say('Wpisy z kalendarza')
 get_calendar('https://docs.google.com/spreadsheets/d/1qkuZfhWN2ZLHsSX0t2_ptC5geoDVSwy4O9dRpeh89NA/edit?usp=sharing')
 # get_investing_values('Allegro', True)
 
@@ -91,6 +92,11 @@ engine.runAndWait()
 while True:
     new_val, change_val = get_investing_values('CD Project')
     if new_val / current_val > 1.01 or new_val / current_val < 0.99:
+        if new_val / current_val > 1:
+            engine.say('Wielki sukces polskiej prawicy')
+        else:
+            engine.say('Dramat')
+
         current_val = new_val
         engine.say('Aktualny kurs cdproject wynosi' + str(current_val) + ' złotych. Zmiana kursi dzisiaj to: ' + str(change_val) + ' procent')
         engine.runAndWait()
@@ -101,3 +107,5 @@ while True:
     time.sleep(10)
 
 # get_wather()
+
+
