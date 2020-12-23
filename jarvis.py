@@ -4,6 +4,31 @@ import pandas as pd
 from io import StringIO
 import time
 import datetime as dt
+import investpy
+
+
+def number(num):
+
+    if len(num) > 9:
+        bilion_count = num[:-9]
+        print(int(bilion_count[-2:]))
+        if bilion_count[-1] == '0':
+            out = num[:-9] + ' miliardów '
+        elif bilion_count[-1] == '1':
+            if len(bilion_count[:-1]) == 1:
+                out = ' miliard '
+        elif 5 < int(bilion_count[-2:]) < 20:
+            out = num[:-9] + ' miliardów '
+        elif 1 < int(bilion_count[-1]) < 5:
+            out = num[:-9] + ' miliardy '
+
+    if len(num) > 6:
+        million_count = num[-9:-6]
+        print(million_count)
+    if len(num) > 3:
+        thousand_count = num[-6:-3]
+        print(thousand_count)
+    return out
 
 
 def parse_text(text, starting_txt, end_txt, return_rounded_float=False):
@@ -20,15 +45,16 @@ def parse_text(text, starting_txt, end_txt, return_rounded_float=False):
 def get_btc_usd(say=False):
     headers = {
         'user-agent': "'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'"}
-    text = requests.get('https://www.investing.com/crypto/bitcoin/btc-usd?cid=49798', timeout=10000, headers=headers).text
+    text = requests.get('https://www.investing.com/crypto/bitcoin/btc-usd?cid=49798', timeout=10000,
+                        headers=headers).text
 
-    starting_string = '<div class="float_lang_base_1 bold">'
+    starting_string = '<span class="arial_22">BTC/USD</span>'
     end_string = '</div>'
     cut_text = parse_text(text, starting_string, end_string)
     print(cut_text)
 
     current_value = parse_text(cut_text, '-last" dir="ltr">', '</span>', True)
-    change_percentage = parse_text(cut_text, 'redFont parentheses" dir="ltr">',
+    change_percentage = parse_text(cut_text, 'parentheses" dir="ltr">',
                                    '%</span>', True)
 
     if say:
@@ -44,14 +70,18 @@ def get_investing_values(symbol, say=False):
     headers = {
         'user-agent': "'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'"}
     url = 'https://www.investing.com/equities/' + symbol.lower().replace(' ', '')
-    text = requests.get(url, timeout=10000, headers=headers).text
+    try:
+        text = requests.get(url, timeout=10000, headers=headers).text
+    except Exception:
+        print('Error: ', Exception)
 
     starting_string = '<div  class="left current-data">'
     end_string = 'Real-time derived data.'
     cut_text = parse_text(text, starting_string, end_string)
 
     current_value = parse_text(cut_text, 'id="last_last" dir="ltr">', '</span>', True)
-    change_percentage = parse_text(cut_text, '<span class="arial_20 redFont  pid-37756-pcp parentheses" dir="ltr">', '%</span>', True)
+    change_percentage = parse_text(cut_text, 'pid-37756-pcp parentheses" dir="ltr">',
+                                   '%</span>', True)
 
     if say:
         engine.say('Aktualny kurs' + symbol + ' wynosi' + str(current_value) + ' złotych')
@@ -103,8 +133,16 @@ def get_calendar(calendar_url):
     print(df)
     return df
 
+#
+#
+# df = investpy.stocks.get_stock_information('CDR', 'poland', as_json=False)
+# for i, col in enumerate(df):
+#     print(col, df.iloc[0, i])
 
 engine = pyttsx3.init()
+
+num = number(str(12345678912))
+engine.say(num)
 get_btc_usd(True)
 # engine.say(dt.datetime.now())
 print(dt.datetime.now())
@@ -124,14 +162,13 @@ while True:
 
         current_val = new_val
         print(dt.datetime.now())
-        engine.say('Aktualny kurs CD Project wynosi' + str(current_val) + ' złotych. Zmiana kursu dzisiaj to: ' + str(change_val) + ' procent')
+        engine.say('Aktualny kurs CD Project wynosi' + str(current_val) + ' złotych. Zmiana kursu dzisiaj to: ' + str(
+            change_val) + ' procent')
         engine.runAndWait()
-        print('zmiana ', current_val)
+        print('Zmiana ', current_val, change_val, "%")
     else:
         print(new_val / current_val)
 
     time.sleep(30)
 
 # get_weather()
-
-
