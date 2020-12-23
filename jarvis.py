@@ -6,6 +6,29 @@ import time
 import datetime as dt
 import investpy
 
+import vlc
+import time
+
+
+def radio():
+    url = 'https://radiostream.pl/tuba10-1.mp3'
+
+    #define VLC instance
+    # instance = vlc.Instance('--input-repeat=-1', '--fullscreen')
+    instance = vlc.Instance()
+
+    #Define VLC player
+    player=instance.media_player_new()
+
+    #Define VLC media
+    media=instance.media_new(url)
+
+    #Set player media
+    player.set_media(media)
+
+    #Play the media
+    player.play()
+
 
 def number(num):
 
@@ -143,7 +166,8 @@ engine = pyttsx3.init()
 
 num = number(str(12345678912))
 engine.say(num)
-get_btc_usd(True)
+radio()
+# get_btc_usd(True)
 # engine.say(dt.datetime.now())
 print(dt.datetime.now())
 engine.say('Wpisy z kalendarza')
