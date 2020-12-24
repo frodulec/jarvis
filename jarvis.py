@@ -166,7 +166,7 @@ engine = pyttsx3.init()
 
 num = number(str(12345678912))
 engine.say(num)
-radio()
+
 # get_btc_usd(True)
 # engine.say(dt.datetime.now())
 print(dt.datetime.now())
@@ -176,6 +176,8 @@ get_calendar('https://docs.google.com/spreadsheets/d/1qkuZfhWN2ZLHsSX0t2_ptC5geo
 
 current_val, opening_val = get_investing_values('CD Project', True)
 engine.runAndWait()
+radio()
+
 while True:
     new_val, change_val = get_investing_values('CD Project')
     if new_val / current_val > 1.01 or new_val / current_val < 0.99:
