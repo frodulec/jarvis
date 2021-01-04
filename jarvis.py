@@ -30,28 +30,8 @@ def radio():
     player.play()
 
 
-def number(num):
-
-    if len(num) > 9:
-        bilion_count = num[:-9]
-        print(int(bilion_count[-2:]))
-        if bilion_count[-1] == '0':
-            out = num[:-9] + ' miliardów '
-        elif bilion_count[-1] == '1':
-            if len(bilion_count[:-1]) == 1:
-                out = ' miliard '
-        elif 5 < int(bilion_count[-2:]) < 20:
-            out = num[:-9] + ' miliardów '
-        elif 1 < int(bilion_count[-1]) < 5:
-            out = num[:-9] + ' miliardy '
-
-    if len(num) > 6:
-        million_count = num[-9:-6]
-        print(million_count)
-    if len(num) > 3:
-        thousand_count = num[-6:-3]
-        print(thousand_count)
-    return out
+def number(in_number):
+    return format(in_number, ',g').replace(',', '*').replace('.', ',').replace('*', '.')
 
 
 def parse_text(text, starting_txt, end_txt, return_rounded_float=False):
@@ -107,8 +87,8 @@ def get_investing_values(symbol, say=False):
                                    '%</span>', True)
 
     if say:
-        engine.say('Aktualny kurs' + symbol + ' wynosi' + str(current_value) + ' złotych')
-        engine.say('Zmiana' + symbol + ' wyniosła ' + str(change_percentage) + ' procent')
+        engine.say('Aktualny kurs' + symbol + ' wynosi' + number(current_value) + ' złotych')
+        engine.say('Zmiana' + symbol + ' wyniosła ' + number(change_percentage) + ' procent')
         print('Aktualny kurs', symbol, current_value)
         print('Zmiana ', symbol, change_percentage, '%')
 
@@ -164,14 +144,11 @@ def get_calendar(calendar_url):
 
 engine = pyttsx3.init()
 
-num = number(str(12345678912))
-engine.say(num)
-
 # get_btc_usd(True)
 # engine.say(dt.datetime.now())
 print(dt.datetime.now())
-engine.say('Wpisy z kalendarza')
-get_calendar('https://docs.google.com/spreadsheets/d/1qkuZfhWN2ZLHsSX0t2_ptC5geoDVSwy4O9dRpeh89NA/edit?usp=sharing')
+# engine.say('Wpisy z kalendarza')
+# get_calendar('https://docs.google.com/spreadsheets/d/1qkuZfhWN2ZLHsSX0t2_ptC5geoDVSwy4O9dRpeh89NA/edit?usp=sharing')
 # get_investing_values('Allegro', True)
 
 current_val, opening_val = get_investing_values('CD Project', True)
