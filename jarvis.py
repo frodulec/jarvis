@@ -9,6 +9,8 @@ import investpy
 import vlc
 import time
 
+import speech_recognition as sr
+
 
 def radio():
     url = 'https://radiostream.pl/tuba10-1.mp3'
@@ -28,6 +30,7 @@ def radio():
 
     #Play the media
     player.play()
+    return player
 
 
 def number(in_number):
@@ -45,7 +48,7 @@ def parse_text(text, starting_txt, end_txt, return_rounded_float=False):
         return text[:end]
 
 
-def get_btc_usd(say=False):
+def get_btc_usd(engine, say=False):
     headers = {
         'user-agent': "'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'"}
     text = requests.get('https://www.investing.com/crypto/bitcoin/btc-usd?cid=49798', timeout=10000,
@@ -61,15 +64,15 @@ def get_btc_usd(say=False):
                                    '%</span>', True)
 
     if say:
-        engine.say('Aktualny kurs btc/usd' + ' wynosi' + str(current_value))
-        engine.say('Zmiana wyniosła ' + str(change_percentage) + ' procent')
+        engine.say('Aktualny kurs btc/usd' + ' wynosi ' + number(current_value))
+        engine.say('Zmiana wyniosła ' + number(change_percentage) + ' procent')
         print('Aktualny kurs', current_value)
         print('Zmiana ', change_percentage, '%')
 
     return current_value, change_percentage
 
 
-def get_investing_values(symbol, say=False):
+def get_investing_values(symbol, say=False, engine=None):
     headers = {
         'user-agent': "'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'"}
     url = 'https://www.investing.com/equities/' + symbol.lower().replace(' ', '')
@@ -142,36 +145,65 @@ def get_calendar(calendar_url):
 # for i, col in enumerate(df):
 #     print(col, df.iloc[0, i])
 
-engine = pyttsx3.init()
 
-# get_btc_usd(True)
-# engine.say(dt.datetime.now())
-print(dt.datetime.now())
-# engine.say('Wpisy z kalendarza')
-# get_calendar('https://docs.google.com/spreadsheets/d/1qkuZfhWN2ZLHsSX0t2_ptC5geoDVSwy4O9dRpeh89NA/edit?usp=sharing')
-# get_investing_values('Allegro', True)
+def speech_rec(r):
+    with sr.Microphone() as source:
+        print("Talk")
+        audio_text = r.listen(source)
+        print("Time over")
+        # recoginize_() method will throw a request error if the API is unreachable, hence using exception handling
 
-current_val, opening_val = get_investing_values('CD Project', True)
-engine.runAndWait()
-radio()
+        try:
+            recognized_text = r.recognize_google(audio_text)
+            print("Text: " + recognized_text)
+            return recognized_text
+        except:
+            print("Sorry, I did not get that")
+            return 'nothing'
 
-while True:
-    new_val, change_val = get_investing_values('CD Project')
-    if new_val / current_val > 1.01 or new_val / current_val < 0.99:
-        if new_val / current_val > 1:
-            engine.say('Wielki sukces polskiej prawicy')
+def main():
+    engine = pyttsx3.init()
+    r = sr.Recognizer()
+    get_btc_usd(engine, True)
+    # engine.say(dt.datetime.now())
+    print(dt.datetime.now())
+    # engine.say('Wpisy z kalendarza')
+    # get_calendar('https://docs.google.com/spreadsheets/d/1qkuZfhWN2ZLHsSX0t2_ptC5geoDVSwy4O9dRpeh89NA/edit?usp=sharing')
+    # get_investing_values('Allegro', True)
+
+    current_val, opening_val = get_investing_values('CD Project', True, engine)
+    engine.runAndWait()
+    player = radio()
+
+    while True:
+        command = speech_rec(r)
+        new_val, change_val = get_investing_values('CD Project')
+        if command == 'play radio':
+            player.play()
+        elif command == 'stop radio':
+            player.stop()
+        elif command.lower() == 'bitcoin value':
+            get_btc_usd(engine, True)
+            engine.runAndWait()
+        if new_val / current_val > 1.01 or new_val / current_val < 0.99:
+            if new_val / current_val > 1:
+                engine.say('Wielki sukces polskiej prawicy')
+            else:
+                engine.say('Dramat')
+
+            current_val = new_val
+            print(dt.datetime.now())
+            engine.say('Aktualny kurs CD Project wynosi' + str(current_val) + ' złotych. Zmiana kursu dzisiaj to: ' + str(
+                change_val) + ' procent')
+            engine.runAndWait()
+            print('Zmiana ', current_val, change_val, "%")
         else:
-            engine.say('Dramat')
+            print(new_val / current_val)
 
-        current_val = new_val
-        print(dt.datetime.now())
-        engine.say('Aktualny kurs CD Project wynosi' + str(current_val) + ' złotych. Zmiana kursu dzisiaj to: ' + str(
-            change_val) + ' procent')
-        engine.runAndWait()
-        print('Zmiana ', current_val, change_val, "%")
-    else:
-        print(new_val / current_val)
+        # time.sleep(30)
 
-    time.sleep(30)
+    # get_weather()
 
-# get_weather()
+
+if __name__ == '__main__':
+    main()
