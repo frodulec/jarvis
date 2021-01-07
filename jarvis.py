@@ -161,6 +161,13 @@ def speech_rec(r):
             print("Sorry, I did not get that")
             return 'nothing'
 
+def check_keywords(keywords, text):
+    if all(x in text.lower() for x in keywords):
+        return True
+    else:
+        return False
+
+
 def main():
     engine = pyttsx3.init()
     r = sr.Recognizer()
@@ -178,11 +185,11 @@ def main():
     while True:
         command = speech_rec(r)
         new_val, change_val = get_investing_values('CD Project')
-        if command.lower() == 'włącz radio':
+        if check_keywords(['włącz', 'radio'], command):
             player.play()
-        elif command.lower() == 'wyłącz radio':
+        elif check_keywords(['wyłącz', 'radio'], command):
             player.stop()
-        elif command.lower() == 'wartość bitcoina':
+        elif check_keywords(['wartość', 'bitcoin'], command):
             get_btc_usd(engine, True)
             engine.runAndWait()
         if new_val / current_val > 1.01 or new_val / current_val < 0.99:
