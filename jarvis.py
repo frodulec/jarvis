@@ -154,7 +154,7 @@ def speech_rec(r):
         # recoginize_() method will throw a request error if the API is unreachable, hence using exception handling
 
         try:
-            recognized_text = r.recognize_google(audio_text)
+            recognized_text = r.recognize_google(audio_text, language="pl-PL")
             print("Text: " + recognized_text)
             return recognized_text
         except:
@@ -164,25 +164,25 @@ def speech_rec(r):
 def main():
     engine = pyttsx3.init()
     r = sr.Recognizer()
-    get_btc_usd(engine, True)
+    # get_btc_usd(engine, True)
     # engine.say(dt.datetime.now())
     print(dt.datetime.now())
     # engine.say('Wpisy z kalendarza')
     # get_calendar('https://docs.google.com/spreadsheets/d/1qkuZfhWN2ZLHsSX0t2_ptC5geoDVSwy4O9dRpeh89NA/edit?usp=sharing')
     # get_investing_values('Allegro', True)
 
-    current_val, opening_val = get_investing_values('CD Project', True, engine)
+    current_val, opening_val = get_investing_values('CD Project', False, engine)
     engine.runAndWait()
     player = radio()
 
     while True:
         command = speech_rec(r)
         new_val, change_val = get_investing_values('CD Project')
-        if command == 'play radio':
+        if command.lower() == 'włącz radio':
             player.play()
-        elif command == 'stop radio':
+        elif command.lower() == 'wyłącz radio':
             player.stop()
-        elif command.lower() == 'bitcoin value':
+        elif command.lower() == 'wartość bitcoina':
             get_btc_usd(engine, True)
             engine.runAndWait()
         if new_val / current_val > 1.01 or new_val / current_val < 0.99:
