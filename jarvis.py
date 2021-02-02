@@ -232,6 +232,7 @@ def main():
     current_val, opening_val = get_investing_values('CD Project', True, engine)
     engine.runAndWait()
     player = radio()
+    player.stop()
 
     while True:
         command = speech_rec(r)
