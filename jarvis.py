@@ -5,11 +5,41 @@ from io import StringIO
 import time
 import datetime as dt
 import investpy
-
+import bitmex
 import vlc
 import time
-
 import speech_recognition as sr
+import pyaudio
+import wave
+import time
+from datetime import datetime
+from threading import Thread
+
+FORMAT = pyaudio.paInt16
+CHANNELS = 2
+RATE = 44100
+RECORD_SECONDS = 3
+
+
+def recorder(prefix):
+    audio = pyaudio.PyAudio()
+    stream = audio.open(
+        format=FORMAT, channels=CHANNELS,
+        rate=RATE, input=True,
+    )
+    try:
+        while True:
+            data = stream.read(RATE * RECORD_SECONDS, False)
+            name = "out.wav"
+            with wave.open(name, 'wb') as waveFile:
+                waveFile.setnchannels(CHANNELS)
+                waveFile.setsampwidth(audio.get_sample_size(FORMAT))
+                waveFile.setframerate(RATE)
+                waveFile.writeframes(data)
+    finally:
+        stream.stop_stream()
+        stream.close()
+        audio.terminate()
 
 
 def radio():
@@ -147,19 +177,33 @@ def get_calendar(calendar_url):
 
 
 def speech_rec(r):
-    with sr.Microphone() as source:
-        print("Talk")
-        audio_text = r.listen(source)
-        print("Time over")
-        # recoginize_() method will throw a request error if the API is unreachable, hence using exception handling
+    # with sr.Microphone() as source:
+    with sr.WavFile('out.wav') as source:
+        audio = r.record(source)
 
         try:
-            recognized_text = r.recognize_google(audio_text, language="pl-PL")
-            print("Text: " + recognized_text)
+            # for testing purposes, we're just using the default API key
+            # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
+            # instead of `r.recognize_google(audio)`
+
+            recognized_text = r.recognize_google(audio, language="pl-PL")
+            print("Google Speech Recognition thinks you said " + recognized_text)
             return recognized_text
-        except:
-            print("Sorry, I did not get that")
+        except sr.UnknownValueError:
+            print("Google Speech Recognition could not understand audio")
             return 'nothing'
+        except sr.RequestError as e:
+            print("Could not request results from Google Speech Recognition service; {0}".format(e))
+            return 'nothing'
+
+
+        # try:
+        #     recognized_text = r.recognize_google(audio_text, language="pl-PL")
+        #     print("Text: " + recognized_text)
+        #     return recognized_text
+        # except:
+        #     print("Sorry, I did not get that")
+        #     return 'nothing'
 
 def check_keywords(keywords, text):
     if all(x in text.lower() for x in keywords):
@@ -168,17 +212,24 @@ def check_keywords(keywords, text):
         return False
 
 
+def get_bitmex_val(client):
+    print(client.Quote.Quote_get(symbol="XBTUSD", reverse=True, count=1).result())
+
+
 def main():
+    bitmex_client = bitmex.bitmex()
+    get_bitmex_val(bitmex_client)
     engine = pyttsx3.init()
     r = sr.Recognizer()
-    # get_btc_usd(engine, True)
+    r.energy_threshold = 100
+    get_btc_usd(engine, True)
     # engine.say(dt.datetime.now())
     print(dt.datetime.now())
     # engine.say('Wpisy z kalendarza')
     # get_calendar('https://docs.google.com/spreadsheets/d/1qkuZfhWN2ZLHsSX0t2_ptC5geoDVSwy4O9dRpeh89NA/edit?usp=sharing')
     # get_investing_values('Allegro', True)
 
-    current_val, opening_val = get_investing_values('CD Project', False, engine)
+    current_val, opening_val = get_investing_values('CD Project', True, engine)
     engine.runAndWait()
     player = radio()
 
@@ -213,4 +264,7 @@ def main():
 
 
 if __name__ == '__main__':
+    Thread(target=recorder, args=('outputs/',)).start()
+    time.sleep(RECORD_SECONDS/2)
+    Thread(target=recorder, args=('outputs/',)).start()
     main()
