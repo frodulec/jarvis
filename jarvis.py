@@ -14,6 +14,7 @@ import wave
 import time
 from datetime import datetime
 from threading import Thread
+from translate import Translator
 
 FORMAT = pyaudio.paInt16
 CHANNELS = 2
@@ -45,20 +46,20 @@ def recorder(prefix):
 def radio():
     url = 'https://radiostream.pl/tuba10-1.mp3'
 
-    #define VLC instance
+    # define VLC instance
     # instance = vlc.Instance('--input-repeat=-1', '--fullscreen')
     instance = vlc.Instance()
 
-    #Define VLC player
-    player=instance.media_player_new()
+    # Define VLC player
+    player = instance.media_player_new()
 
-    #Define VLC media
-    media=instance.media_new(url)
+    # Define VLC media
+    media = instance.media_new(url)
 
-    #Set player media
+    # Set player media
     player.set_media(media)
 
-    #Play the media
+    # Play the media
     player.play()
     return player
 
@@ -152,12 +153,20 @@ def get_bankier_values(symbol, say=False):
 
 
 def get_weather():
+    translator = Translator(to_lang="pl")
     api_key = '3f53933116ae4b37adec5517033460e5'
     url = 'http://api.openweathermap.org/data/2.5/weather?q=warsaw&appid=' + api_key
-    text = requests.get(url, timeout=10000).text
+    weather = requests.get(url, timeout=10000).json()
+    print('Głowny ', translator.translate(weather['weather'][0]['main']))
+    print('Opis', translator.translate(weather['weather'][0]['description']))
+    text = 'Aktualna pogoda. ' + translator.translate(weather['weather'][0]['description'])
+    # print(weather['weather']['description'])
+    text += ', temperatura wynosi ' + str(round(float(weather['main']['temp'] - 273.16), 1)) + '°C'
+    text += ', temperatura odczuwalna wynosi ' + str(round(float(weather['main']['feels_like'] - 273.16), 1)) + '°C'
+    text += ', ciśnienie wynosi ' + str(number(round(float(weather['main']['pressure']), 1))) + ' hPa'
+    text += ', wilgotność wynosi ' + str(number(round(float(weather['main']['humidity']), 1))) + '%'
     print(text)
-    # opady = parse_text(text, 'Szansa opadów:', '%')
-    # print(opady)
+    return text
 
 
 def get_calendar(calendar_url):
@@ -169,6 +178,7 @@ def get_calendar(calendar_url):
     df = pd.read_csv(csv_file, sep=',')
     print(df)
     return df
+
 
 #
 #
@@ -197,7 +207,6 @@ def speech_rec(r):
             # print("Could not request results from Google Speech Recognition service; {0}".format(e))
             return 'nothing'
 
-
         # try:
         #     recognized_text = r.recognize_google(audio_text, language="pl-PL")
         #     print("Text: " + recognized_text)
@@ -205,6 +214,7 @@ def speech_rec(r):
         # except:
         #     print("Sorry, I did not get that")
         #     return 'nothing'
+
 
 def check_keywords(keywords, text):
     if all(x in text.lower() for x in keywords):
@@ -223,6 +233,8 @@ def main():
     engine = pyttsx3.init()
     r = sr.Recognizer()
     r.energy_threshold = 100
+    weather_text = get_weather()
+    engine.say(weather_text)
     get_btc_usd(engine, True)
     # engine.say(dt.datetime.now())
     print(dt.datetime.now())
@@ -253,8 +265,9 @@ def main():
 
             current_val = new_val
             print(dt.datetime.now())
-            engine.say('Aktualny kurs CD Project wynosi' + str(current_val) + ' złotych. Zmiana kursu dzisiaj to: ' + str(
-                change_val) + ' procent')
+            engine.say(
+                'Aktualny kurs CD Project wynosi' + str(current_val) + ' złotych. Zmiana kursu dzisiaj to: ' + str(
+                    change_val) + ' procent')
             engine.runAndWait()
             print('Zmiana ', current_val, change_val, "%")
         else:
@@ -264,11 +277,8 @@ def main():
         # time.sleep(30)
 
 
-
-
 if __name__ == '__main__':
-    get_weather()
     Thread(target=recorder, args=('outputs/',)).start()
-    time.sleep(RECORD_SECONDS/2)
+    time.sleep(RECORD_SECONDS / 2)
     Thread(target=recorder, args=('outputs/',)).start()
     main()
