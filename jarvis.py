@@ -81,7 +81,7 @@ def parse_text(text, starting_txt, end_txt, return_rounded_float=False):
 
 def get_btc_usd(engine, say=False):
     headers = {
-        'user-agent': "'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'"}
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
     text = requests.get('https://www.investing.com/crypto/bitcoin/btc-usd?cid=49798', timeout=10000,
                         headers=headers).text
 
@@ -152,7 +152,7 @@ def get_bankier_values(symbol, say=False):
     return current_value, opening_value
 
 
-def get_weather():
+def get_current_weather():
     translator = Translator(to_lang="pl")
     api_key = '3f53933116ae4b37adec5517033460e5'
     url = 'http://api.openweathermap.org/data/2.5/weather?q=warsaw&appid=' + api_key
@@ -167,6 +167,16 @@ def get_weather():
     text += ', wilgotność wynosi ' + str(number(round(float(weather['main']['humidity']), 1))) + '%'
     print(text)
     return text
+
+
+def get_weather_forecast():
+    api_key = '3f53933116ae4b37adec5517033460e5'
+    url = 'http://api.openweathermap.org/data/2.5/forecast?q=warsaw&appid=' + api_key
+    weather = requests.get(url, timeout=10000).json()
+    print(len(weather['list']))
+    print(weather['list'][1])
+    print(weather['list'][20])
+
 
 
 def get_calendar(calendar_url):
@@ -228,12 +238,13 @@ def get_bitmex_val(client):
 
 
 def main():
+    get_weather_forecast()
     bitmex_client = bitmex.bitmex()
     get_bitmex_val(bitmex_client)
     engine = pyttsx3.init()
     r = sr.Recognizer()
     r.energy_threshold = 100
-    weather_text = get_weather()
+    weather_text = get_current_weather()
     engine.say(weather_text)
     get_btc_usd(engine, True)
     # engine.say(dt.datetime.now())
@@ -249,7 +260,10 @@ def main():
 
     while True:
         command = speech_rec(r)
-        new_val, change_val = get_investing_values('CD Project')
+        try:
+            new_val, change_val = get_investing_values('CD Project')
+        finally:
+            pass
         if check_keywords(['włącz', 'radio'], command):
             player.play()
         elif check_keywords(['wyłącz', 'radio'], command):
@@ -258,7 +272,7 @@ def main():
             get_btc_usd(engine, True)
             engine.runAndWait()
         elif check_keywords(['pogoda'], command):
-            weather_text = get_weather()
+            weather_text = get_current_weather()
             engine.say(weather_text)
             engine.runAndWait()
         if new_val / current_val > 1.01 or new_val / current_val < 0.99:
