@@ -257,6 +257,10 @@ def main():
         elif check_keywords(['wartość', 'bitcoin'], command):
             get_btc_usd(engine, True)
             engine.runAndWait()
+        elif check_keywords(['pogoda'], command):
+            weather_text = get_weather()
+            engine.say(weather_text)
+            engine.runAndWait()
         if new_val / current_val > 1.01 or new_val / current_val < 0.99:
             if new_val / current_val > 1:
                 engine.say('Wielki sukces polskiej prawicy')
