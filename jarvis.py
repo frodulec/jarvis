@@ -87,7 +87,7 @@ def get_btc_usd(engine, say=False):
     starting_string = '<span class="arial_22">BTC/USD</span>'
     end_string = '</div>'
     cut_text = parse_text(text, starting_string, end_string)
-    print(cut_text)
+    # print(cut_text)
 
     current_value = parse_text(cut_text, '-last" dir="ltr">', '</span>', True)
     change_percentage = parse_text(cut_text, 'parentheses" dir="ltr">',
@@ -152,11 +152,12 @@ def get_bankier_values(symbol, say=False):
 
 
 def get_weather():
-    url = 'https://www.google.com/search?q=pogoda%20warszawa'
+    api_key = '3f53933116ae4b37adec5517033460e5'
+    url = 'http://api.openweathermap.org/data/2.5/weather?q=warsaw&appid=' + api_key
     text = requests.get(url, timeout=10000).text
     print(text)
-    opady = parse_text(text, 'Szansa opadów:', '%')
-    print(opady)
+    # opady = parse_text(text, 'Szansa opadów:', '%')
+    # print(opady)
 
 
 def get_calendar(calendar_url):
@@ -187,13 +188,13 @@ def speech_rec(r):
             # instead of `r.recognize_google(audio)`
 
             recognized_text = r.recognize_google(audio, language="pl-PL")
-            print("Google Speech Recognition thinks you said " + recognized_text)
+            print(recognized_text)
             return recognized_text
         except sr.UnknownValueError:
-            print("Google Speech Recognition could not understand audio")
+            # print("Google Speech Recognition could not understand audio")
             return 'nothing'
         except sr.RequestError as e:
-            print("Could not request results from Google Speech Recognition service; {0}".format(e))
+            # print("Could not request results from Google Speech Recognition service; {0}".format(e))
             return 'nothing'
 
 
@@ -257,14 +258,16 @@ def main():
             engine.runAndWait()
             print('Zmiana ', current_val, change_val, "%")
         else:
-            print(new_val / current_val)
+            # print(new_val / current_val)
+            pass
 
         # time.sleep(30)
 
-    # get_weather()
+
 
 
 if __name__ == '__main__':
+    get_weather()
     Thread(target=recorder, args=('outputs/',)).start()
     time.sleep(RECORD_SECONDS/2)
     Thread(target=recorder, args=('outputs/',)).start()
