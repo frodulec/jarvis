@@ -14,7 +14,7 @@ import wave
 import time
 from datetime import datetime
 from threading import Thread
-from translate import Translator
+from googletrans import Translator
 
 FORMAT = pyaudio.paInt16
 CHANNELS = 2
@@ -153,11 +153,11 @@ def get_bankier_values(symbol, say=False):
 
 
 def get_current_weather():
-    translator = Translator(to_lang="pl")
+    translator = Translator()
     api_key = '3f53933116ae4b37adec5517033460e5'
     url = 'http://api.openweathermap.org/data/2.5/weather?q=warsaw&appid=' + api_key
     weather = requests.get(url, timeout=10000).json()
-    print('Głowny ', translator.translate(weather['weather'][0]['main']))
+    print('Głowny ', translator.translate(str(weather['weather'][0]['main']), dest='pl', src='en'))
     print('Opis', translator.translate(weather['weather'][0]['description']))
     text = 'Aktualna pogoda. ' + translator.translate(weather['weather'][0]['description'])
     # print(weather['weather']['description'])
